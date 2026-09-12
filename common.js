@@ -1729,7 +1729,7 @@
                     // 이미 기존에 transform 스타일이 설정되어 있을 수 있으므로 값을 더해 주거나 새로 지정
                     // 기존 스타일 유지를 위해 대안으로 top이나 margin-top을 사용해도 좋습니다.
                     popupElement.style.transition = 'transform 0.3s ease';
-                    popupElement.style.transform = `translateY(calc(-50% + ${offset}px))`; 
+                    popupElement.style.transform = `translateY(calc(-${offset}px))`; 
                     // 팝업이 원래 중앙정렬(translate(-50%, -50%)) 상태라고 가정한 예시입니다.
                     // 만약 원래 top: 0 이라면 popupElement.style.top = `${offset}px` 형태로 변경 가능합니다.
                 }
@@ -1738,7 +1738,7 @@
 
         // 원래 위치로 복구하는 함수
         function resetPopupPosition() {
-            popupElement.style.transform = 'translateY(-50%)'; // 기존 팝업의 원본 transform 스타일로 초기화
+            popupElement.style.transform = 'translateY(0)'; // 기존 팝업의 원본 transform 스타일로 초기화
         }
 
         // 이벤트 연결
