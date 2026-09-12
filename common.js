@@ -1697,6 +1697,7 @@
 
     function keyboard(pop){
         const uA = navigator.userAgent.toLowerCase();
+
         // 1. 조건 체크: 카카오톡(kakaotalk)이면서 안드로이드(android)인 경우에만 실행
         const isKakaoTalk = uA.includes('kakaotalk');
         const isAndroid = uA.includes('android');
@@ -1707,71 +1708,32 @@
         const popupElement = document.querySelector(pop);
         if (!popupElement) return; // 팝업 요소를 찾지 못하면 종료
 
-        // [추가] .popup 자체에 스크롤이 작동할 수 있도록 설정을 켜줍니다.
-        popupElement.style.overflowY = 'auto';
-        popupElement.style.webkitOverflowScrolling = 'touch';
-
-        // 팝업 내부의 .pop-wrap 요소를 찾습니다.
-        const popWrap = popupElement.querySelector('.pop-wrap');
-        if (!popWrap) return;
-
         const inputs = popupElement.querySelectorAll('input, textarea');
 
-        // .pop-wrap의 원래 기존 패딩 값을 기억해 둡니다. (기본값 복구용)
-        const originalPadding = window.getComputedStyle(popWrap).paddingBottom;
-
-        // 패딩을 조절해 인풋을 밀어 올리는 함수
-        function adjustPaddingToCenter(event) {
-            const input = event.target;
-
-            // 카카오톡 키보드가 올라오고 innerHeight가 줄어들 때까지 대기
+        // 스크롤 공통 실행 함수
+        function handleScroll(event) {
+            // 안드로이드 카카오톡 웹뷰는 키보드가 뷰포트를 가리는 속도가 제각각이므로 
+            // 최소 300~400ms의 지연(Timeout)을 주어야 안정적으로 스크롤이 맞춰집니다.
             setTimeout(() => {
-                // 1. 키보드를 제외하고 현재 눈에 보이는 화면의 중앙 Y 좌표
-                const visualCenter = window.innerHeight / 2;
-
-                // 2. 현재 인풋의 화면 상 절대적인 중앙 Y 좌표
-                const inputRect = input.getBoundingClientRect();
-                const inputCenter = inputRect.top + (inputRect.height / 2);
-
-                // 3. 인풋 중앙이 화면 중앙보다 얼마나 아래에 있는지 계산
-                const offset = visualCenter - inputCenter;
-
-                // 4. 인풋이 화면 중앙보다 아래에 가려져 있다면 (offset이 음수)
-                if (offset < 0) {
-                    popWrap.style.transition = 'padding-bottom 0.3s ease';
-
-                    // 부족한 거리(절대값)만큼 원래 패딩에 더해서 아래쪽 여백을 넓힙니다.
-                    const currentPaddingNum = parseFloat(originalPadding) || 0;
-                    const newPadding = currentPaddingNum + Math.abs(offset);
-
-                    popWrap.style.paddingBottom = `${newPadding}px`;
-
-                    // [추가] 패딩이 늘어난 후, 활성화된 .popup 내부에서 인풋이 중앙에 오도록 스크롤시킵니다.
-                    input.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                }
-            }, 350); // 키보드 개방 대기 시간
+                event.target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center' // 키보드 바로 위 중앙에 위치하도록 배치
+                });
+            }, 350);
         }
 
-        // 원래 패딩 값으로 복구하는 함수
-        function resetPadding() {
-            popWrap.style.paddingBottom = originalPadding;
-        }
-
-        // 이벤트 바인딩
+        // 3. 각 인풋들에 이벤트 바인딩
         inputs.forEach(input => {
-            input.addEventListener('focus', adjustPaddingToCenter);
+            // 최초 포커스 시점 스크롤 처리
+            input.addEventListener('focus', handleScroll);
 
+            // 키보드 내리기 버튼으로 키보드만 닫힌 상태(포커스 유지)에서 다시 클릭했을 때 처리
             input.addEventListener('click', (event) => {
+                // 현재 클릭한 인풋이 활성화(activeElement) 상태인데 또 클릭된 경우에만 실행
                 if (document.activeElement === event.target) {
-                    adjustPaddingToCenter(event);
+                    handleScroll(event);
                 }
             });
-
-            // 포커스가 풀리면 원래 패딩으로 복귀
-            input.addEventListener('blur', resetPadding);
         });
     }
     /**
