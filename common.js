@@ -1706,6 +1706,7 @@
         // 2. 전달받은 팝업 아이디/클래스 내부의 input 요소들만 선택
         const popupElement = document.querySelector(pop);
         if (!popupElement) return; // 팝업 요소를 찾지 못하면 종료
+        popupElement.style.padding = '0'; // 기존 패딩 제거
         popupElement.style.alignItems = 'flex-end'; // 팝업을 화면 하단에 고정
         popupElement.style.overflowY = 'auto'; // 세로 스크롤 가능
         popupElement.style.webkitOverflowScrolling = 'touch'; // iOS 스크롤 부드럽게
