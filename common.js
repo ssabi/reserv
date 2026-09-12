@@ -1712,37 +1712,28 @@
         if (!popWrap) return;
 
         const inputs = popupElement.querySelectorAll('input, textarea');
-
-        // .pop-wrap의 원래 기존 패딩 값을 기억해 둡니다. (기본값 복구용)
         const originalPadding = window.getComputedStyle(popWrap).paddingBottom;
+
+        // [핵심] 처음 페이지가 로드되었을 때의 순수 화면 높이 (키보드가 없을 때의 원래 높이)
+        const originalWindowHeight = window.innerHeight;
 
         // 패딩을 조절해 인풋을 밀어 올리는 함수
         function adjustPaddingToCenter(event) {
             const input = event.target;
 
-            // 카카오톡 키보드가 올라오고 innerHeight가 줄어들 때까지 대기
             setTimeout(() => {
-                // 1. 키보드를 제외하고 현재 눈에 보이는 화면의 중앙 Y 좌표
                 const visualCenter = window.innerHeight / 2;
-
-                // 2. 현재 인풋의 화면 상 절대적인 중앙 Y 좌표
                 const inputRect = input.getBoundingClientRect();
                 const inputCenter = inputRect.top + (inputRect.height / 2);
-
-                // 3. 인풋 중앙이 화면 중앙보다 얼마나 아래에 있는지 계산
                 const offset = visualCenter - inputCenter;
 
-                // 4. 인풋이 화면 중앙보다 아래에 가려져 있다면 (offset이 음수)
                 if (offset < 0) {
                     popWrap.style.transition = 'padding-bottom 0.3s ease';
-
-                    // 부족한 거리(절대값)만큼 원래 패딩에 더해서 아래쪽 여백을 넓힙니다.
                     const currentPaddingNum = parseFloat(originalPadding) || 0;
                     const newPadding = currentPaddingNum + Math.abs(offset);
-
                     popWrap.style.paddingBottom = `${newPadding}px`;
                 }
-            }, 350); // 키보드 개방 대기 시간
+            }, 350);
         }
 
         // 원래 패딩 값으로 복구하는 함수
@@ -1750,7 +1741,7 @@
             popWrap.style.paddingBottom = originalPadding;
         }
 
-        // 이벤트 바인딩
+        // 1. 인풋 관련 이벤트 바인딩
         inputs.forEach(input => {
             input.addEventListener('focus', adjustPaddingToCenter);
 
@@ -1760,8 +1751,26 @@
                 }
             });
 
-            // 포커스가 풀리면 원래 패딩으로 복귀
+            // 일반적인 바깥 영역 클릭으로 포커스가 빠져나갈 때
             input.addEventListener('blur', resetPadding);
+        });
+
+        // 2. [핵심] 모바일 키보드 내림 버튼 감지 로직
+        // 안드로이드 카카오톡은 키보드가 내려가면 window.innerHeight가 원래 크기로 복구됩니다.
+        window.addEventListener('resize', () => {
+            // 현재 화면 높이가 처음 원래 높이 부근으로 돌아왔는지 확인 (여유오차 30px 고려)
+            if (window.innerHeight >= originalWindowHeight - 30) {
+
+                // 현재 어떤 input이 포커스를 잡고 있는 상태라면 (가짜 포커스 상태)
+                if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+
+                    // 1. 포커스를 강제로 해제하여 다음 터치 시 정상적으로 focus 이벤트가 다시 발동하도록 만듭니다.
+                    document.activeElement.blur(); 
+
+                    // 2. 늘어났던 패딩도 원래대로 되돌립니다.
+                    resetPadding();
+                }
+            }
         });
     }
     /**
