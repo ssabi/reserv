@@ -1707,51 +1707,61 @@
         const popupElement = document.querySelector(pop);
         if (!popupElement) return; // 팝업 요소를 찾지 못하면 종료
 
+        // 팝업 내부의 .pop-wrap 요소를 찾습니다.
+        const popWrap = popupElement.querySelector('.pop-wrap');
+        if (!popWrap) return;
+
         const inputs = popupElement.querySelectorAll('input, textarea');
 
-        // 인풋을 화면 중앙으로 올리는 함수
-        function movePopupToCenter(event) {
+        // .pop-wrap의 원래 기존 패딩 값을 기억해 둡니다. (기본값 복구용)
+        const originalPadding = window.getComputedStyle(popWrap).paddingBottom;
+
+        // 패딩을 조절해 인풋을 밀어 올리는 함수
+        function adjustPaddingToCenter(event) {
             const input = event.target;
 
-            // 모바일 키보드가 완전히 올라와서 window.innerHeight(현재 보이는 화면 높이)가 줄어들 때까지 대기
+            // 카카오톡 키보드가 올라오고 innerHeight가 줄어들 때까지 대기
             setTimeout(() => {
-                // 1. 키보드를 제외하고 눈에 보이는 화면의 중앙 Y 좌표
+                // 1. 키보드를 제외하고 현재 눈에 보이는 화면의 중앙 Y 좌표
                 const visualCenter = window.innerHeight / 2;
 
                 // 2. 현재 인풋의 화면 상 절대적인 중앙 Y 좌표
                 const inputRect = input.getBoundingClientRect();
                 const inputCenter = inputRect.top + (inputRect.height / 2);
 
-                // 3. 인풋 중앙과 화면 중앙의 거리 차이 계산
-                // (인풋이 화면 중앙보다 아래에 있으면 offset은 음수가 됨)
+                // 3. 인풋 중앙이 화면 중앙보다 얼마나 아래에 있는지 계산
                 const offset = visualCenter - inputCenter;
 
-                // 4. 인풋이 중앙보다 아래에 가려져 있다면 그 차이만큼 팝업을 위로 밀어 올림
+                // 4. 인풋이 화면 중앙보다 아래에 가려져 있다면 (offset이 음수)
                 if (offset < 0) {
-                    popupElement.style.transition = 'transform 0.3s ease';
-                    // 하단 고정 팝업이므로 원래 위치(0)에서 offset(음수값)만큼 위로 올림(Y축 이동)
-                    popupElement.style.transform = `translateY(${offset}px)`;
+                    popWrap.style.transition = 'padding-bottom 0.3s ease';
+
+                    // 부족한 거리(절대값)만큼 원래 패딩에 더해서 아래쪽 여백을 넓힙니다.
+                    const currentPaddingNum = parseFloat(originalPadding) || 0;
+                    const newPadding = currentPaddingNum + Math.abs(offset);
+
+                    popWrap.style.paddingBottom = `${newPadding}px`;
                 }
-            }, 350);
+            }, 350); // 키보드 개방 대기 시간
         }
 
-        // 원래 위치로 복구하는 함수
-        function resetPopupPosition() {
-            popupElement.style.transform = 'translateY(0)'; // 기존 팝업의 원본 transform 스타일로 초기화
+        // 원래 패딩 값으로 복구하는 함수
+        function resetPadding() {
+            popWrap.style.paddingBottom = originalPadding;
         }
 
-        // 이벤트 연결
+        // 이벤트 바인딩
         inputs.forEach(input => {
-            input.addEventListener('focus', movePopupToCenter);
+            input.addEventListener('focus', adjustPaddingToCenter);
 
             input.addEventListener('click', (event) => {
                 if (document.activeElement === event.target) {
-                    movePopupToCenter(event);
+                    adjustPaddingToCenter(event);
                 }
             });
 
-            // 인풋에서 포커스가 빠져나가면(키보드가 닫히면) 팝업 위치를 원래대로 돌려놓음
-            input.addEventListener('blur', resetPopupPosition);
+            // 포커스가 풀리면 원래 패딩으로 복귀
+            input.addEventListener('blur', resetPadding);
         });
     }
     /**
