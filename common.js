@@ -1694,6 +1694,47 @@
             options.onClose();
         }
     };
+
+    function keyboard(pop){
+        const uA = navigator.userAgent.toLowerCase();
+        // 1. 조건 체크: 카카오톡(kakaotalk)이면서 안드로이드(android)인 경우에만 실행
+        const isKakaoTalk = uA.includes('kakaotalk');
+        const isAndroid = uA.includes('android');
+
+        if (!isKakaoTalk || !isAndroid) return;
+
+        // 2. 전달받은 팝업 아이디/클래스 내부의 input 요소들만 선택
+        const popupElement = document.querySelector(pop);
+        if (!popupElement) return; // 팝업 요소를 찾지 못하면 종료
+
+        const inputs = popupElement.querySelectorAll('input, textarea');
+
+        // 스크롤 공통 실행 함수
+        function handleScroll(event) {
+            // 안드로이드 카카오톡 웹뷰는 키보드가 뷰포트를 가리는 속도가 제각각이므로 
+            // 최소 300~400ms의 지연(Timeout)을 주어야 안정적으로 스크롤이 맞춰집니다.
+            setTimeout(() => {
+                event.target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center' // 키보드 바로 위 중앙에 위치하도록 배치
+                });
+            }, 350);
+        }
+
+        // 3. 각 인풋들에 이벤트 바인딩
+        inputs.forEach(input => {
+            // 최초 포커스 시점 스크롤 처리
+            input.addEventListener('focus', handleScroll);
+
+            // 키보드 내리기 버튼으로 키보드만 닫힌 상태(포커스 유지)에서 다시 클릭했을 때 처리
+            input.addEventListener('click', (event) => {
+                // 현재 클릭한 인풋이 활성화(activeElement) 상태인데 또 클릭된 경우에만 실행
+                if (document.activeElement === event.target) {
+                    handleScroll(event);
+                }
+            });
+        });
+    }
     /**
      * 프로그래밍 팝업 오픈 (Base.Ui.showPopup / bestshop 직접 호출)
      * @param {string|HTMLElement} targetPop - '#id' 또는 요소
@@ -1720,6 +1761,8 @@
         onPopArr.push(popKey);
         onPopObj[popKey] = options;
 
+
+
         if (!$pop.hasClass('toast') && !$pop.hasClass('main-banner')) {
             openPopupDim();
         } else {
@@ -1728,6 +1771,7 @@
 
         setPopupA11y($pop, true);
         bindLayerFocusTrap($pop);
+        keyboard(popKey);
 
         if (!$pop.hasClass('toast')) {
             $pop.css('outline', 'none').attr('tabindex', '0').focus();
