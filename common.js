@@ -1716,7 +1716,7 @@
             // 최소 300~400ms의 지연(Timeout)을 주어야 안정적으로 스크롤이 맞춰집니다.
             setTimeout(() => {
                 event.target.scrollIntoView({
-                    behavior: 'smooth',
+                    behavior: 'auto',
                     block: 'center' // 키보드 바로 위 중앙에 위치하도록 배치
                 });
             }, 350);
