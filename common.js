@@ -1708,33 +1708,51 @@
         if (!popupElement) return; // 팝업 요소를 찾지 못하면 종료
 
         const inputs = popupElement.querySelectorAll('input, textarea');
-        alert(pop);
-        // 스크롤 공통 실행 함수
-        function handleScroll(event) {
-            // 안드로이드 카카오톡 웹뷰는 키보드가 뷰포트를 가리는 속도가 제각각이므로 
-            // 최소 300~400ms의 지연(Timeout)을 주어야 안정적으로 스크롤이 맞춰집니다.
-            setTimeout(() => {
-                event.target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center' // 키보드 바로 위 중앙에 위치하도록 배치
-                });
 
-                popupElement.querySelector('.pop-wrap').style.paddingBottom = "200px";
-            }, 350);
+        // 인풋을 화면 중앙으로 올리는 함수
+        function movePopupToCenter(event) {
+            const input = event.target;
+
+            // 모바일 키보드가 완전히 올라와서 window.innerHeight(현재 보이는 화면 높이)가 줄어들 때까지 대기
+            setTimeout(() => {
+                // 1. 현재 키보드를 제외하고 눈에 보이는 화면(Visual Viewport)의 중앙 좌표
+                const visualCenter = window.innerHeight / 2;
+
+                // 2. 현재 인풋이 화면 전체에서 차지하는 절대적인 y축 위치 (getBoundingClientRect 기준)
+                const inputRect = input.getBoundingClientRect();
+                const inputCenter = inputRect.top + (inputRect.height / 2);
+
+                // 3. 인풋 중심이 화면 중심보다 아래에 있다면 그 차이만큼 팝업을 위로 올림
+                const offset = visualCenter - inputCenter;
+
+                if (offset < 0) {
+                    // 이미 기존에 transform 스타일이 설정되어 있을 수 있으므로 값을 더해 주거나 새로 지정
+                    // 기존 스타일 유지를 위해 대안으로 top이나 margin-top을 사용해도 좋습니다.
+                    popupElement.style.transition = 'transform 0.3s ease';
+                    popupElement.style.transform = `translateY(calc(-50% + ${offset}px))`; 
+                    // 팝업이 원래 중앙정렬(translate(-50%, -50%)) 상태라고 가정한 예시입니다.
+                    // 만약 원래 top: 0 이라면 popupElement.style.top = `${offset}px` 형태로 변경 가능합니다.
+                }
+            }, 350); // 키보드 개방 시간 확보
         }
 
-        // 3. 각 인풋들에 이벤트 바인딩
-        inputs.forEach(input => {
-            // 최초 포커스 시점 스크롤 처리
-            input.addEventListener('focus', handleScroll);
+        // 원래 위치로 복구하는 함수
+        function resetPopupPosition() {
+            popupElement.style.transform = 'translateY(-50%)'; // 기존 팝업의 원본 transform 스타일로 초기화
+        }
 
-            // 키보드 내리기 버튼으로 키보드만 닫힌 상태(포커스 유지)에서 다시 클릭했을 때 처리
+        // 이벤트 연결
+        inputs.forEach(input => {
+            input.addEventListener('focus', movePopupToCenter);
+
             input.addEventListener('click', (event) => {
-                // 현재 클릭한 인풋이 활성화(activeElement) 상태인데 또 클릭된 경우에만 실행
                 if (document.activeElement === event.target) {
-                    handleScroll(event);
+                    movePopupToCenter(event);
                 }
             });
+
+            // 인풋에서 포커스가 빠져나가면(키보드가 닫히면) 팝업 위치를 원래대로 돌려놓음
+            input.addEventListener('blur', resetPopupPosition);
         });
     }
     /**
