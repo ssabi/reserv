@@ -1719,7 +1719,7 @@
                     block: 'center' // 키보드 바로 위 중앙에 위치하도록 배치
                 });
 
-                popupElement.style.paddingBottom = "200px";
+                popupElement.querySelector('.pop-wrap').style.paddingBottom = "200px";
             }, 350);
         }
 
