@@ -1711,13 +1711,11 @@
         const popWrap = popupElement.querySelector('.pop-wrap');
         if (!popWrap) return;
 
-        const inputs = popupElement.querySelectorAll('input, textarea');
+        // input, textarea, select 중 disabled와 readonly가 없는 요소만 선택
+        const inputs = popupElement.querySelectorAll('input:not([disabled]):not([readonly]), textarea:not([disabled]):not([readonly]), select:not([disabled])');
 
         // .pop-wrap의 원래 기존 패딩 값을 기억해 둡니다. (기본값 복구용)
         const originalPadding = window.getComputedStyle(popWrap).paddingBottom;
-
-
-
 
         // 패딩을 조절해 인풋을 밀어 올리는 함수
         function adjustPaddingToCenter(event) {
