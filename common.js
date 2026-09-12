@@ -1708,7 +1708,7 @@
         if (!popupElement) return; // 팝업 요소를 찾지 못하면 종료
 
         // 팝업 내부의 .pop-wrap 요소를 찾습니다.
-        const popWrap = popupElement.querySelector('.pop-wrap');
+        const popWrap = popupElement.querySelector('.popup-container > div');
         if (!popWrap) return;
 
         // input, textarea, select 중 disabled와 readonly가 없는 요소만 선택
