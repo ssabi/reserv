@@ -51,23 +51,30 @@
 	<script type="text/javascript" src="https://bestshop.lge.co.kr/lg5-common-best/bestshop/bestshop.common.base.js"></script>
 	<!-- <script type="text/javascript" src="https://bestshop.lge.co.kr/lg5-common-best/new_js/common.js" defer async></script> -->
     <style>
-        #comPopUserCertify {
+        #comPopUserCertify.on {
             overflow-y:auto;
             -webkit-overflow-scrolling: touch;
             padding:0;
             align-items:flex-end;
+            display:block !important;
         }
-        #comPopUserCertify:after { content:"";display:block;position:absolute;left:0;top:0;width:100%;height:100.1%;z-index:-1;}
-        #comPopUserCertify .pop-wrap {
-            position:relative;
+        #comPopUserCertify.on:before { 
+            content:'';
+            display:block;
+            width:100%;
+            height:110dvh;
+        }
+        /* #comPopUserCertify:after { content:"";display:block;position:absolute;left:0;top:0;width:100%;height:120%;z-index:-1;} */
+        #comPopUserCertify.on .pop-wrap {
+            position:sticky;
             overflow:visible;
         }
-        #comPopUserCertify .pop-wrap .popup-container {
+        #comPopUserCertify.on .pop-wrap .popup-container {
             flex:none;
             overflow:hidden;
             background-color:inherit;
         }
-        #comPopUserCertify .pop-wrap .popup-footer {
+        #comPopUserCertify.on .pop-wrap .popup-footer {
             background-color:inherit;
         }
     </style>
