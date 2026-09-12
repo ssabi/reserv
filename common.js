@@ -1715,25 +1715,24 @@
 
             // 모바일 키보드가 완전히 올라와서 window.innerHeight(현재 보이는 화면 높이)가 줄어들 때까지 대기
             setTimeout(() => {
-                // 1. 현재 키보드를 제외하고 눈에 보이는 화면(Visual Viewport)의 중앙 좌표
+                // 1. 키보드를 제외하고 눈에 보이는 화면의 중앙 Y 좌표
                 const visualCenter = window.innerHeight / 2;
 
-                // 2. 현재 인풋이 화면 전체에서 차지하는 절대적인 y축 위치 (getBoundingClientRect 기준)
+                // 2. 현재 인풋의 화면 상 절대적인 중앙 Y 좌표
                 const inputRect = input.getBoundingClientRect();
                 const inputCenter = inputRect.top + (inputRect.height / 2);
 
-                // 3. 인풋 중심이 화면 중심보다 아래에 있다면 그 차이만큼 팝업을 위로 올림
+                // 3. 인풋 중앙과 화면 중앙의 거리 차이 계산
+                // (인풋이 화면 중앙보다 아래에 있으면 offset은 음수가 됨)
                 const offset = visualCenter - inputCenter;
 
+                // 4. 인풋이 중앙보다 아래에 가려져 있다면 그 차이만큼 팝업을 위로 밀어 올림
                 if (offset < 0) {
-                    // 이미 기존에 transform 스타일이 설정되어 있을 수 있으므로 값을 더해 주거나 새로 지정
-                    // 기존 스타일 유지를 위해 대안으로 top이나 margin-top을 사용해도 좋습니다.
                     popupElement.style.transition = 'transform 0.3s ease';
-                    popupElement.style.transform = `translateY(calc(-${offset}px))`; 
-                    // 팝업이 원래 중앙정렬(translate(-50%, -50%)) 상태라고 가정한 예시입니다.
-                    // 만약 원래 top: 0 이라면 popupElement.style.top = `${offset}px` 형태로 변경 가능합니다.
+                    // 하단 고정 팝업이므로 원래 위치(0)에서 offset(음수값)만큼 위로 올림(Y축 이동)
+                    popupElement.style.transform = `translateY(${offset}px)`;
                 }
-            }, 350); // 키보드 개방 시간 확보
+            }, 350);
         }
 
         // 원래 위치로 복구하는 함수
