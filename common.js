@@ -1706,16 +1706,34 @@
         // 2. 전달받은 팝업 아이디/클래스 내부의 input 요소들만 선택
         const popupElement = document.querySelector(pop);
         if (!popupElement) return; // 팝업 요소를 찾지 못하면 종료
+        popupElement.style.alignItems = 'flex-end'; // 팝업을 화면 하단에 고정
+        popupElement.style.overflowY = 'auto'; // 세로 스크롤 가능
+        popupElement.style.webkitOverflowScrolling = 'touch'; // iOS 스크롤 부드럽게
 
         // 팝업 내부의 .pop-wrap 요소를 찾습니다.
-        const popWrap = popupElement.querySelector('.popup-container > div');
+        const popWrap = popupElement.querySelector('.pop-wrap');
         if (!popWrap) return;
+
+        popWrap.style.overflow = 'visible';
+        popWrap.style.position = 'static';
+
+        const popContainer = popWrap.querySelector('.popup-container > div');
+        if (!popContainer) return;
+
+        popContainer.style.flex = 'none';
+        popContainer.style.overflow = 'hidden';
+        popContainer.style.backgroundColor = 'inherit';
+
+        const popFooter = popupElement.querySelector('.popup-footer');
+        if (!popFooter) return;
+
+        popFooter.style.backgroundColor = 'inherit';
 
         // input, textarea, select 중 disabled와 readonly가 없는 요소만 선택
         const inputs = popupElement.querySelectorAll('input:not([disabled]):not([readonly]), textarea:not([disabled]):not([readonly]), select:not([disabled])');
 
         // .pop-wrap의 원래 기존 패딩 값을 기억해 둡니다. (기본값 복구용)
-        const originalPadding = window.getComputedStyle(popWrap).paddingBottom;
+        const originalPadding = window.getComputedStyle(popContainer).paddingBottom;
 
         // 패딩을 조절해 인풋을 밀어 올리는 함수
         function adjustPaddingToCenter(event) {
@@ -1735,20 +1753,20 @@
 
                 // 4. 인풋이 화면 중앙보다 아래에 가려져 있다면 (offset이 음수)
                 if (offset < 0) {
-                    popWrap.style.transition = 'padding-bottom 0.3s ease';
+                    popContainer.style.transition = 'padding-bottom 0.3s ease';
 
                     // 부족한 거리(절대값)만큼 원래 패딩에 더해서 아래쪽 여백을 넓힙니다.
                     const currentPaddingNum = parseFloat(originalPadding) || 0;
                     const newPadding = currentPaddingNum + Math.abs(offset);
 
-                    popWrap.style.paddingBottom = `${newPadding}px`;
+                    popContainer.style.paddingBottom = `${newPadding}px`;
                 }
             }, 350); // 키보드 개방 대기 시간
         }
 
         // 원래 패딩 값으로 복구하는 함수
         function resetPadding() {
-            popWrap.style.paddingBottom = originalPadding;
+            popContainer.style.paddingBottom = originalPadding;
         }
 
         // 이벤트 바인딩
