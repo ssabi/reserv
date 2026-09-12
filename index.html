@@ -53,17 +53,27 @@
     <style>
         #comPopUserCertify.on {
             padding:0;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end; 
-            height: 150dvh; 
+        }
 
-            /* 2. [핵심] 내용이 없어도 상시 스크롤이 가능하도록 강제 활성화 */
+        #comPopUserCertify.on > div {
+            width: 100%;
+            height: 100%;
+
+            /* auto 대신 scroll을 주어 스크롤 시스템을 항상 열어둡니다 */
             overflow-y: scroll; 
             -webkit-overflow-scrolling: touch;
-        }
+
+            /* 수직 정렬을 위해 Flexbox를 사용하되, justify-content는 절대 쓰지 않습니다 */
+            display: flex;
+            flex-direction: column;
+         }
         
         /* #comPopUserCertify:after { content:"";display:block;position:absolute;left:0;top:0;width:100%;height:120%;z-index:-1;} */
+        .scroll-filler {
+            flex-grow: 1;       /* 남는 화면 위의 빈 공간을 자석처럼 전부 채워줌 */
+            min-height: 110dvh; /* [핵심] 화면 높이보다 무조건 길게 만들어 상시 스크롤 강제 유도 */
+            width: 100%;
+        }
         
         #comPopUserCertify.on .pop-wrap {
             overflow:visible;
@@ -322,6 +332,9 @@
 
 <!-- s:비회원 인증 팝업 -->
 <div class="popup bottom-sheet" id="comPopUserCertify">
+    <div>
+
+    <div class="scroll-filler"></div>
     <div class="pop-wrap">
 
         <div class="popup-header">
@@ -374,6 +387,7 @@
             <button type="button" class="text-btn no-login" data-redirect-url="/sso/member/login?state=%2FcounselReserve%2Fsearch%2Fcertify">로그인 하고 리뷰 작성하기</button>
         </div>
 
+    </div>
     </div>
 </div>
 <!-- e:비회원 인증 팝업 -->
