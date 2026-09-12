@@ -1708,7 +1708,7 @@
         if (!popupElement) return; // 팝업 요소를 찾지 못하면 종료
 
         const inputs = popupElement.querySelectorAll('input, textarea');
-
+        alert(pop);
         // 스크롤 공통 실행 함수
         function handleScroll(event) {
             // 안드로이드 카카오톡 웹뷰는 키보드가 뷰포트를 가리는 속도가 제각각이므로 
